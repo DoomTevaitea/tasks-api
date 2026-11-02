@@ -6,5 +6,5 @@ jobs:
     steps: 
         - run: echo "Branche TP1" 
         - run: echo "Branche ${{ github.ref_name }}" 
-        - run: echo "Branche ${{ github.actor }}"
+        - run: echo "Auteur ${{ github.actor }}"
 
