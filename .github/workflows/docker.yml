@@ -116,3 +116,26 @@ jobs:
           done
           curl -fsS http://localhost:8000/health
           curl -fsS http://localhost:8000/version
+
+  update-config:
+    needs: [build, deploy-production]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.build.outputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository_owner }}/tasks-config
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+          path: config
+      - run: bash scripts/set-image-tag.sh config/k8s/deployment.yaml "$VERSION"
+      - name: Pousser la configuration
+        working-directory: config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add k8s/deployment.yaml
+          git commit -m "Deploie la version $VERSION"
+          git push
